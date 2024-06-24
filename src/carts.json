@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "products": [{
+      "title": "Producto1",
+      "description": "Esta es una descripción 1",
+      "price": 19.9999,
+      "thumbnail": "https://ejemploU1.com/imagen.jpg",
+      "code": "ABb123",
+      "stock": 50,
+      "id": 2
+    }]
+  },
+  {
+    "id": 2,
+    "products": []
+  }
+]

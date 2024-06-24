@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Products</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="mb-4">Real-Time Products</h1>
+
+        <form class="row g-3" id="formProduct">
+            <!-- Nombre del Producto -->
+            <div class="col-md-6">
+                <label for="title" class="form-label">Nombre del Producto</label>
+                <input class="form-control" type="text" name="title" id="title"  required>
+            </div>
+
+            <!-- Descripción -->
+            <div class="col-md-6">
+                <label for="description" class="form-label">Descripción</label>
+                <input class="form-control" type="text" name="description" id="description"  required>
+            </div>
+
+            <!-- Stock -->
+            <div class="col-md-6">
+                <label for="stock" class="form-label">Stock</label>
+                <input class="form-control" type="number" name="stock" id="stock"  required>
+            </div>
+
+            <!-- Imagen (URL) -->
+            <div class="col-md-6">
+                <label for="thumbnail" class="form-label">Imagen (URL)</label>
+                <input class="form-control" type="text" name="thumbnail" id="thumbnail"  required>
+            </div>
+
+            <!-- Categoría -->
+            <div class="col-md-6">
+                <label for="category" class="form-label">Categoría</label>
+                <input class="form-control" type="text" name="category" id="category"  required>
+            </div>
+
+            <!-- Precio -->
+            <div class="col-md-6">
+                <label for="price" class="form-label">Precio</label>
+                <input class="form-control" type="number" name="price" id="price"  required>
+            </div>
+
+            <!-- Estado (Checkbox) -->
+            <div class="col-md-6">
+                <div class="form-check mt-3">
+                    <input name="status" class="form-check-input" type="checkbox" value="true" id="flexCheckChecked" checked>
+                    <label class="form-check-label" for="flexCheckChecked">Estado</label>
+                </div>
+            </div>
+
+            <!-- Código -->
+            <div class="col-md-6">
+                <label for="code" class="form-label">Código</label>
+                <input class="form-control" type="text" name="code" id="code" required>
+            </div>
+
+            <!-- Botón Registrar -->
+            <div class="col-12 mt-4">
+                <button class="btn btn-primary" type="submit" id="add-btn">Registrar</button>
+            </div>
+        </form>
+
+        <h2 class="mt-4">Eliminar Producto:</h2>
+
+        <!-- ID del Producto a Eliminar -->
+        <div class="row">
+            <div class="col-md-6">
+                <label for="id-prod" class="form-label">ID del Producto</label>
+                <input class="form-control" type="text" name="id-prod" id="id-prod">
+            </div>
+
+            <!-- Botón Eliminar -->
+            <div class="col-md-6 mt-4">
+                <button class="btn btn-danger" type="button" id="delete-btn">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <h2>Lista de Productos</h2>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Descripción</th>
+                        <th scope="col">Precio</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="list-products"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/realtime.js"></script>
+
+    <script>
+        const socket = io();
+
+        // Renderiza los productos recibidos
+        socket.on('productList', (products) => {
+            const productList = document.getElementById('list-products');
+            productList.innerHTML = '';
+            products.docs.forEach(product => {
+                const tr = document.createElement('tr');
+
+                // Columnas de la tabla
+                tr.innerHTML = `
+                    <td>${product._id}</td>
+                    <td>${product.title}</td>
+                    <td>${product.description}</td>
+                    <td>$${product.price}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" data-id="${product._id}" onclick="deleteProduct('${product._id}')">Eliminar</button>
+                    </td>
+                `;
+
+                productList.appendChild(tr);
+            });
+        });
+
+        document.getElementById('formProduct').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const product = {};
+            formData.forEach((value, key) => {
+                product[key] = value;
+            });
+
+            socket.emit('createProduct', product);
+            e.target.reset();
+        });
+
+        document.getElementById('delete-btn').addEventListener('click', () => {
+            const productId = document.getElementById('id-prod').value;
+            socket.emit('deleteProduct', productId);
+        });
+
+        // Función para eliminar un producto por ID
+        function deleteProduct(productId) {
+            socket.emit('deleteProduct', productId);
+        }
+
+        // Actualiza la lista de productos al recibir un evento de actualización
+        socket.on('updateProducts', (products) => {
+            const productList = document.getElementById('list-products');
+            productList.innerHTML = '';
+            products.docs.forEach(product => {
+                const tr = document.createElement('tr');
+
+                // Columnas de la tabla
+                tr.innerHTML = `
+                    <td>${product._id}</td>
+                    <td>${product.title}</td>
+                    <td>${product.description}</td>
+                    <td>$${product.price}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" data-id="${product._id}" onclick="deleteProduct('${product._id}')">Eliminar</button>
+                    </td>
+                `;
+
+                productList.appendChild(tr);
+            });
+        });
+
+        socket.on('productError', (error) => {
+            console.error('Error:', error.message);
+            alert('Error: ' + error.message);
+        });
+    </script>
+</body>
+</html>

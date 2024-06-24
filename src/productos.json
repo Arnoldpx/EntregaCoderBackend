@@ -1,0 +1,83 @@
+[
+  {
+    "title": "Producto2",
+    "description": "Esta es una descripción 2",
+    "price": 144,
+    "thumbnail": "https://ejemploU2.com/imagen.jpg",
+    "code": "ABc123",
+    "stock": 50,
+    "id": 3
+  },
+  {
+    "title": "Producto3",
+    "description": "Esta es una descripción 3",
+    "price": 144,
+    "thumbnail": "https://ejemploU3.com/imagen.jpg",
+    "code": "ABd123",
+    "stock": 50,
+    "id": 4
+  },
+  {
+    "title": "producto5",
+    "description": "esta es una describcion 5",
+    "price": "233",
+    "thumbnail": "4",
+    "code": "23",
+    "stock": "234",
+    "id": 5
+  },
+  {
+    "title": "producto3",
+    "description": " esta es una descripcion 5",
+    "price": "122",
+    "thumbnail": "12",
+    "code": "12",
+    "stock": "12",
+    "id": 6
+  },
+  {
+    "title": "producto3",
+    "description": "bebida",
+    "price": "123",
+    "thumbnail": "222",
+    "code": "423",
+    "stock": "1",
+    "id": 7
+  },
+  {
+    "title": "producto1",
+    "description": "describcion producto1",
+    "price": "2300",
+    "thumbnail": "12",
+    "code": "220",
+    "stock": "12",
+    "id": 8
+  },
+  {
+    "title": "producto23",
+    "description": "bebida",
+    "price": "122333",
+    "thumbnail": "12",
+    "code": "2222",
+    "stock": "12",
+    "id": 9
+  },
+  {
+    "title": "producto12",
+    "description": "bebida",
+    "price": "12222",
+    "thumbnail": "21",
+    "code": "3233",
+    "stock": "23",
+    "id": 10
+  },
+  {
+    "title": "productos12",
+    "description": "bebida",
+    "price": "12",
+    "thumbnail": "3333",
+    "code": "1111",
+    "stock": "1",
+    "id": 11
+  }
+]
