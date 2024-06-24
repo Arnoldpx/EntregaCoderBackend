@@ -104,8 +104,7 @@
                             <p><strong>Stock:</strong> {{product.stock}}</p>
                             <p><strong>Code:</strong> {{product.code}}</p>
                         </div>
-                        <button class="btn btn-add-to-cart" onclick="addToCart('{{product._id}}', {{product.stock}})">
-                            <i class="fas fa-cart-plus"></i> Agregar al Carrito
+                       <button class="btn btn-success product" data-value="${{product.stock}{}" id="{{product._id}}" onclick="addToCart(event)">Agregar al carrito</button>
                         </button>
                         <button class="btn btn-back ml-2" onclick="window.history.back();">
                             <i class="fas fa-arrow-left"></i> Volver
@@ -126,54 +125,70 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        let cart;
+        document.addEventListener('DOMContentLoaded', () => {
+            let cart; 
 
-        async function addToCart(productId, stock) {
-            const { value: quantity } = await Swal.fire({
-                title: 'Add quantity',
-                input: 'number',
-                inputAttributes: {
-                    autocapitalize: 'off',
-                    min: 1,
-                    max: stock
-                },
-                showCancelButton: true,
-                confirmButtonText: 'Confirm',
-            });
+           
+            async function addToCart(event) {
+                const productId = event.target.id;
+                const stock = Number(event.target.getAttribute('data-value'));
+                const { value: quantity } = await Swal.fire({
+                    title: 'Agregar cantidad',
+                    input: 'number',
+                    inputAttributes: {
+                        autocapitalize: 'off'
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'Confirmar',
+                });
 
-            if (quantity) {
-                try {
-                    const response = await fetch(`/api/carts/${cart._id}/products/${productId}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ "productId": productId, "quantity": quantity }),
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
+                if (quantity !== null) {
+                    const quantityNumber = Number(quantity);
+                    if (quantityNumber > 0 && stock >= quantityNumber) {
+                        try {
+                            const response = await fetch(`/api/carts/${cart._id}/products/${productId}`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ "productId": productId, "quantity": quantityNumber }),
+                            });
+                            if (response.ok) {
+                                Swal.fire({
+                                    title: 'Producto agregado exitosamente',
+                                    text: `ID: ${productId} - Cantidad: ${quantityNumber}`,
+                                    icon: 'success',
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Hubo un error al agregar el producto al carrito',
+                                    icon: 'error',
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error al agregar el producto al carrito:', error);
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Hubo un error al agregar el producto al carrito',
+                                icon: 'error',
+                            });
+                        }
+                    } else if (quantityNumber <= 0) {
                         Swal.fire({
-                            title: 'Product added successfully',
-                            text: `ID: ${productId} - Quantity: ${quantity}`,
-                            icon: 'success',
+                            title: 'La cantidad debe ser mayor que 0',
+                            icon: 'warning',
                         });
                     } else {
                         Swal.fire({
-                            title: 'Error',
-                            text: 'There was an error adding the product to the cart',
+                            title: 'La cantidad no puede ser mayor que el stock',
                             icon: 'error',
                         });
                     }
-                } catch (error) {
-                    console.error('Error adding product to cart:', error);
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'There was an error adding the product to the cart',
-                        icon: 'error',
-                    });
                 }
             }
-        }
+            window.addToCart = addToCart;
+        });
     </script>
 </body>
 </html>

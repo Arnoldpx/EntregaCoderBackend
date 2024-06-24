@@ -4,71 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrito de Compras</title>
-    <style>
-        /* Estilos para el carrito */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .cart-table {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,.1);
-            overflow: hidden;
-        }
-
-        .cart-table table {
-            width: 100%;
-            margin-bottom: 0;
-        }
-
-        .cart-table thead {
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .cart-table th,
-        .cart-table td {
-            vertical-align: middle;
-            text-align: left;
-            padding: 12px;
-        }
-
-        .cart-table .text-center {
-            text-align: center;
-        }
-
-        .cart-image {
-            max-width: 60px;
-            max-height: 60px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .btn-group {
-            display: flex;
-            align-items: center;
-        }
-
-        .btn-group .mx-2 {
-            margin: 0 4px;
-        }
-    </style>
+    <!-- Agrega aquí tus estilos CSS -->
 </head>
 <body>
     <div id="cart" data-cart-id="{{cart._id}}" class="container mt-5">
         <h3 class="text-center">Carrito ID: {{cart._id}}</h3>
-        {{#if cart.products.length}}
-            <div class="row mt-4">
-                <div class="col">
+        <div class="row mt-4">
+            <div class="col">
+                {{#if cart.products.length}}
                     <div class="cart-table">
                         <table class="table">
                             <thead>
@@ -105,19 +48,24 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
+                    <div class="row mt-4">
+                        <div class="col text-end">
+                            <button class="btn btn-danger" onclick="emptyCart('{{cart._id}}')">Vaciar carrito</button>
+                        </div>
+                    </div>
+                {{else}}
+                    <div class="col text-center mt-4">
+                        <h2 class="mb-4">No tienes productos en tu carrito</h2>
+                    </div>
+                {{/if}}
+            
+                    <div class="col text-center">
+                        <a class="btn btn-primary btn-sm" href="/">Seguir Comprando</a>
+                        <button class="btn btn-secondary btn-sm ms-2" onclick="goBack()">Volver</button>
+                    </div>
+                
             </div>
-            <div class="row mt-4">
-                <div class="col text-end">
-                    <button class="btn btn-danger" onclick="emptyCart('{{cart._id}}')">Vaciar carrito</button>
-                </div>
-            </div>
-        {{else}}
-            <div class="col text-center mt-4">
-                <h2 class="mb-4">No tienes productos en tu carrito</h2>
-                <a class="btn btn-info" href="/">Seguir Comprando</a>
-            </div>
-        {{/if}}
+        </div>
     </div>
 
     <script>
@@ -134,7 +82,7 @@
                 if (!response.ok) {
                     throw new Error('Error al eliminar el producto del carrito');
                 }
-                // Actualizar la interfaz después de eliminar el producto
+               
                 window.location.reload();
             })
             .catch(error => {
@@ -163,6 +111,11 @@
                 console.error('Error:', error);
                 alert('Ocurrió un error al intentar vaciar el carrito');
             });
+        }
+
+        // Función para ir atrás en la historia del navegador
+        function goBack() {
+            window.history.back();
         }
     </script>
 </body>
