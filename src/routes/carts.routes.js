@@ -51,7 +51,7 @@ router.delete('/cart/:cartId/:productId', async (req, res) => {
         const cartId = req.params.cartId;
         const productId = req.params.productId;
 
-        // Aquí deberías implementar la lógica para eliminar el producto del carrito en MongoDB
+       
         await cartManager.deleteProductFromCart(cartId, productId);
 
         res.status(200).json({ status: 'success', message: 'Producto eliminado del carrito' });

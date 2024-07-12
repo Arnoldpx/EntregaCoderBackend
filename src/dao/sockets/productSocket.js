@@ -21,7 +21,6 @@ const productSocket = (io) => {
             }
         });
         socket.on("deleteProduct",async(productId)=>{
-            console.log(productId)
             await MongoProductManager.deleteProduct(productId);
             const updatedProducts = await MongoProductManager.getProducts();
             io.emit('updateProducts', updatedProducts);

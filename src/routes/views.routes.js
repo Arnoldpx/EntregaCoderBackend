@@ -1,6 +1,7 @@
 import express from 'express';
 import MongoProductManager from '../dao/mongo/mongoProductManager.js';
 import MongoCartsManager from '../dao/mongo/mongoCartManager.js';
+import User from '../dao/model/user.model.js';
 
 const router = express.Router();
 const prod = MongoProductManager;
@@ -122,5 +123,44 @@ router.get('/carts/:cartId', async (req, res) => {
 router.get('/chat', (req, res) => {
     res.render('chat', {});  
 });
+
+// register u login 
+
+router.get('/login', (req, res) => {
+    try {
+      res.render('login');
+    } catch (error) {
+      console.error('Error al cargar la vista de login:', error);
+      res.status(500).send('Error al cargar la vista de login');
+    }
+  });
+  
+  
+  router.get('/register', (req, res) => {
+    try {
+      res.render('register');
+    } catch (error) {
+      console.error('Error al cargar la vista de registro:', error);
+      res.status(500).send('Error al cargar la vista de registro');
+    }
+  });
+  
+  
+  router.get('/profile', async (req, res) => {
+    try {
+      const user = await User.findById(req.session.userId).select('-password');
+      res.render('profile', { user: user.toObject() });
+    } catch (error) {
+      console.error('Error al cargar la vista de perfil:', error);
+      res.status(500).send('Error al cargar la vista de perfil');
+    }
+  });
+  
+
+
+
+
+
+
 
 export default router;

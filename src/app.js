@@ -6,12 +6,15 @@ import { engine } from 'express-handlebars';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import dotenv from 'dotenv';
+import bcrypt from 'bcryptjs';
+import session from 'express-session';
 
+
+import sessionRouter from './routes/api/sessions.js';
 import productRoutes from './routes/products.routes.js';
 import cartRoutes from './routes/carts.routes.js';
 import viewsRouter from './routes/views.routes.js';
 import messageRoutes from './routes/message.routes.js';
-import userRoutes from './routes/user.routes.js';
 import chatSocket from './dao/sockets/chatSocket.js';
 import productSocket from './dao/sockets/productSocket.js';
 import exphbs from'express-handlebars';
@@ -29,6 +32,33 @@ const PORT = 8080;
 // Middleware para permitir formato JSON y URL-encoded
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(session({
+    secret: 'mi_secreto',
+    resave: false,
+    saveUninitialized: true,
+  }));
+
+
+  // Middleware para rutas públicas y privadas
+const redirectToLogin = (req, res, next) => {
+    if (!req.session.userId) {
+      res.redirect('/login');
+    } else {
+      next();
+    }
+  };
+  
+  const redirectToProfile = (req, res, next) => {
+    if (req.session.userId) {
+      res.redirect('/profile');
+    } else {
+      next();
+    }
+  };
+  
+  // Rutas
+ 
+
 
 // Configuración de Handlebars
 app.engine('handlebars', engine());
@@ -49,7 +79,7 @@ app.use('/api', messageRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api', cartRoutes);
 app.use('/', viewsRouter);
-app.use('/api', userRoutes);
+ app.use('/api/sessions', sessionRouter);
 
 chatSocket(io);
 productSocket(io);
