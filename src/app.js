@@ -6,8 +6,10 @@ import { engine } from 'express-handlebars';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import dotenv from 'dotenv';
-import bcrypt from 'bcryptjs';
 import session from 'express-session';
+import MongoStore from "connect-mongo";
+import passport from "passport";
+import bodyParser from "body-parser";
 
 
 import sessionRouter from './routes/api/sessions.js';
@@ -18,6 +20,7 @@ import messageRoutes from './routes/message.routes.js';
 import chatSocket from './dao/sockets/chatSocket.js';
 import productSocket from './dao/sockets/productSocket.js';
 import exphbs from'express-handlebars';
+import initializePassport from "./config/passport.config.js";
 dotenv.config();
 
 
@@ -33,31 +36,16 @@ const PORT = 8080;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
-    secret: 'mi_secreto',
-    resave: false,
-    saveUninitialized: true,
-  }));
+  secret: 'secretkey',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: "mongodb+srv://Arnaldo:qweasd@cluster0.week34v.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0" }),
+}));
 
 
-  // Middleware para rutas públicas y privadas
-const redirectToLogin = (req, res, next) => {
-    if (!req.session.userId) {
-      res.redirect('/login');
-    } else {
-      next();
-    }
-  };
-  
-  const redirectToProfile = (req, res, next) => {
-    if (req.session.userId) {
-      res.redirect('/profile');
-    } else {
-      next();
-    }
-  };
-  
-  // Rutas
- 
+initializePassport();
+app.use(passport.initialize());
+app.use(passport.session());
 
 
 // Configuración de Handlebars

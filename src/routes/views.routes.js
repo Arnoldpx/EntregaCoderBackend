@@ -2,6 +2,7 @@ import express from 'express';
 import MongoProductManager from '../dao/mongo/mongoProductManager.js';
 import MongoCartsManager from '../dao/mongo/mongoCartManager.js';
 import User from '../dao/model/user.model.js';
+import { isAuthenticated, isNotAuthenticated } from '../middleware/auth.js';
 
 const router = express.Router();
 const prod = MongoProductManager;
@@ -78,11 +79,11 @@ router.get('/realtimeproducts', async (req, res) => {
         res.status(500).send('Error fetching products');
     }
 });
-router.get('/products', async (req, res) => {
+router.get('/products', isAuthenticated, async (req, res) => {
     try {
         const products = await prod.getProducts();
-        console.log(products); // Verifica los datos recibidos en la consola
-        res.render('products', { products: products.docs });
+        console.log(products); 
+        res.render('products', { products: products.docs, user: req.session.user });
     } catch (error) {
         console.error('Error fetching products:', error.message);
         res.status(500).send('Error fetching products');
@@ -126,7 +127,7 @@ router.get('/chat', (req, res) => {
 
 // register u login 
 
-router.get('/login', (req, res) => {
+router.get('/login', isNotAuthenticated, (req, res) => {
     try {
       res.render('login');
     } catch (error) {
@@ -136,7 +137,7 @@ router.get('/login', (req, res) => {
   });
   
   
-  router.get('/register', (req, res) => {
+  router.get('/register', isNotAuthenticated, (req, res) => {
     try {
       res.render('register');
     } catch (error) {
@@ -146,15 +147,25 @@ router.get('/login', (req, res) => {
   });
   
   
-  router.get('/profile', async (req, res) => {
+  router.get('/profile', isAuthenticated, async (req, res) => {
     try {
-      const user = await User.findById(req.session.userId).select('-password');
-      res.render('profile', { user: user.toObject() });
+        if (!req.session.user || !req.session.user._id) {
+            console.error('Usuario no autenticado');
+            return res.status(401).send('Usuario no autenticado');
+        }
+
+        const user = await User.findById(req.session.user._id).select('-password');
+        if (!user) {
+            console.error('Usuario no encontrado');
+            return res.status(404).send('Usuario no encontrado');
+        }
+
+        res.render('profile', { user: user.toObject() });
     } catch (error) {
-      console.error('Error al cargar la vista de perfil:', error);
-      res.status(500).send('Error al cargar la vista de perfil');
+        console.error('Error al cargar la vista de perfil:', error);
+        res.status(500).send('Error al cargar la vista de perfil');
     }
-  });
+});
   
 
 

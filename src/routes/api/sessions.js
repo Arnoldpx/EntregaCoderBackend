@@ -1,70 +1,92 @@
-import express from 'express';
-import bcrypt from 'bcryptjs';
+import { Router } from 'express';
+import passport from 'passport';
+import Cart from '../../dao/model/carts.model.js';
 import User from '../../dao/model/user.model.js';
-import {crateHash, isValidPassword} from '../../utils.js'
 
-const router = express.Router();
+const router = Router();
 
-// Registro de usuario
-router.post('/register', async (req, res) => {
+// Registro
+router.post('/register', passport.authenticate('register', {
+  failureRedirect: '/api/sessions/failregister'
+}), async (req, res) => {
   try {
-    const { first_name, last_name, email, age, password } = req.body;
-    const hashedPassword = crateHash(password);
-    const user = new User({ first_name, last_name, email, age, password: hashedPassword });
-    await user.save();
-    res.redirect('/login');
-  } catch (error) {
-    console.error('Error en el registro de usuario:', error);
-    res.status(500).send('Error en el registro de usuario');
-  }
-});
-
-// Login de usuario
-router.post('/login', async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      if (!email || !password) {
-        return res.status(400).send({ status: 'error', error: 'Datos incompletos' });
-      }
-  
-      const user = await User.findOne({ email });
-      if (!user) {
-        return res.status(404).send('Usuario no encontrado');
-      }
-  
-      if (!isValidPassword(user.password, password)) {
-        return res.status(403).send({ status: "error", error: "Password incorrecto" });
-      }
-  
-      req.session.userId = {
-        id: user._id,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        email: user.email,
-        age: user.age,
+      // Guardar el usuario en la sesión si es necesario
+      req.session.user = {
+          _id: req.user._id,
+          first_name: req.user.first_name,
+          last_name: req.user.last_name,
+          email: req.user.email,
+          age: req.user.age,
+          cart: req.user.cart
       };
-  
-      res.redirect('/products');
-    } catch (error) {
-      console.error('Error en el login de usuario:', error);
-      res.status(500).send('Error en el login de usuario');
-    }
-  });
 
-// Logout de usuario
-router.post('/logout', (req, res) => {
-  try {
-    req.session.destroy(err => {
-      if (err) {
-        return res.redirect('/profile');
-      }
-      res.clearCookie('sid');
       res.redirect('/login');
-    });
   } catch (error) {
-    console.error('Error en el logout de usuario:', error);
-    res.status(500).send('Error en el logout de usuario');
+      console.error('Error en el registro:', error);
+      res.status(500).send('Error al registrar el usuario');
   }
 });
 
+router.get('/failregister', (req, res) => {
+    console.log("Registro fallido");
+    res.send({ error: "fallo" });
+});
+
+router.get("/github", passport.authenticate("github",{scope:["user:email"]}),async(req,res)=>{})
+
+
+router.get("/githubcallback",passport.authenticate("github",{failureRedirect:"/login"}),async(req,res)=>{
+    req.session.user=req.user
+    res.redirect("/")
+})
+
+
+// Inicio de sesión
+router.post('/login', passport.authenticate("login", { failureRedirect: '/api/sessions/faillogin' }), (req, res) => {
+    if (!req.user) return res.status(400).send({ status: "error", error: "Datos Incorrectos" });
+
+   
+    req.session.user = {
+        _id: req.user._id, 
+        first_name: req.user.first_name,
+        last_name: req.user.last_name,
+        email: req.user.email,
+        age: req.user.age,
+        cart: req.user.cart 
+    };
+
+    res.redirect('/products');
+});
+
+router.get('/cart', (req, res) => {
+    if (!req.session.user || !req.session.user.cart) {
+        return res.status(404).json({ error: 'Carrito no encontrado en la sesión' });
+    }
+    res.json({ cart: req.session.user.cart });
+});
+
+router.get('/faillogin', (req, res) => {
+    console.log("Inicio de sesión fallido");
+    res.send({ error: "fallo" });
+});
+
+// Obtener la sesión actual del usuario
+router.get('/profile', (req, res) => {
+    if (req.session.user) {
+        res.status(200).json({ user: req.session.user });
+    } else {
+        res.status(404).json({ error: 'No hay usuario en sesión' });
+    }
+});
+
+// Cierre de sesión
+router.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Error al cerrar sesión:', err);
+            return res.status(500).send('Error al cerrar sesión');
+        }
+        res.redirect('/login');
+    });
+});
 export default router;

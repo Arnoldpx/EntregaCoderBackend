@@ -6,11 +6,8 @@ import bcrypt from 'bcryptjs'
 
 export default __dirname
 
-export const crateHash = password => bcrypt.hashSync(password,bcrypt.genSaltSync(10))
 
-export const isValidPassword = (userPassword, inputPassword) => {
-    if (!userPassword || !inputPassword) {
-      throw new Error('Password values cannot be undefined');
-    }
-    return bcrypt.compareSync(inputPassword, userPassword);
-  };
+
+export const createHash = password => bcrypt.hashSync(password, bcrypt.genSaltSync(10))
+
+export const isValidPassword = (user, password) => bcrypt.compareSync(password, user.password)

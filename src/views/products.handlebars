@@ -4,6 +4,17 @@
             <h1>Productos</h1>
             <button class="btn btn-primary" onclick="goToCart()">Ir al Carrito</button>
         </div>
+        <h2>Perfil de Usuario</h2>
+<p>Nombre: {{user.first_name}}</p>
+<p>Apellido: {{user.last_name}}</p>
+<p>Email: {{user.email}}</p>
+<p>Edad: {{user.age}}</p>
+<form action="/api/sessions/logout" method="POST">
+    <button type="submit">Cerrar Sesión</button>
+</form>
+       
+    </form>
+</div>
         <div class="row">
             <div class="col-md-3">
                 <form id="filterForm">
